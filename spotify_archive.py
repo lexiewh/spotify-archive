@@ -13,6 +13,7 @@ import requests
 import sys
 from datetime import datetime
 import calendar
+import pprint
 
 from config import spotify_token
 
@@ -91,6 +92,26 @@ class SpotifyArchive(object):
 
         return json_dict['id']
 
+    def moveToMonthly(self, daily_id, month_id):
+        # get all of the uris from the tracks in the daily playlist
+        r = requests.get(
+            'https://api.spotify.com/v1/playlists/{}/tracks'.format(daily_id), headers=self.header)
+
+        if r:
+            json_dict = r.json()
+        else:
+            r.raise_for_status()
+
+        track_list = []
+        for item in json_dict['items']:
+            track_list.append(item['track']['uri'])
+
+        req_body = {'uris': track_list}
+        requests.post('https://api.spotify.com/v1/playlists/{}/tracks'.format(month_id),
+                      headers=self.header, data=json.dumps(req_body, indent=4))
+
+        return
+
 
 def main():
     try:
@@ -103,6 +124,7 @@ def main():
         'https://api.spotify.com/v1/users/{}/playlists?limit=50&offset=0'.format(user))
     daily_id = spotifyarchive.getUserDailyPlaylist()
     month_id = spotifyarchive.doesMonthPlaylistExist(user)
+    spotifyarchive.moveToMonthly(daily_id, month_id)
 
 
 if __name__ == '__main__':
