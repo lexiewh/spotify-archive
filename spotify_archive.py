@@ -4,16 +4,15 @@
 #       - access daily playlist ✓
 #           - items -> name
 #       - check monthly playlists for correct years ✓
-#           - if monthly playlist isn't made, make one
-#       - take all daily songs and move them to month playlist
-#       - remove all songs on daily playlist
+#           - if monthly playlist isn't made, make one ✓
+#       - take all daily songs and move them to month playlist ✓
+#       - remove all songs on daily playlist ✓
 
 import json
 import requests
 import sys
 from datetime import datetime
 import calendar
-import pprint
 
 from config import spotify_token
 
@@ -112,6 +111,37 @@ class SpotifyArchive(object):
 
         return
 
+    def removeTracks(self, daily_id):
+        # create the request body from all of the current tracks
+        r = requests.get(
+            'https://api.spotify.com/v1/playlists/{}/tracks'.format(daily_id), headers=self.header)
+
+        if r:
+            json_dict = r.json()
+        else:
+            r.raise_for_status()
+
+        tracks = []
+        position = 0
+        for item in json_dict['items']:
+            track = {}
+            uri = item['track']['uri']
+            track['uri'] = uri
+            track['positions'] = [position]
+            tracks.append(track)
+            position = position + 1
+
+        data = {}
+        data['tracks'] = tracks
+        print(json.dumps(data))
+
+        r = requests.delete('https://api.spotify.com/v1/playlists/{}/tracks'.format(daily_id),
+                            headers=self.header, data=json.dumps(data, indent=4))
+
+        r.raise_for_status()
+
+        return
+
 
 def main():
     try:
@@ -125,6 +155,7 @@ def main():
     daily_id = spotifyarchive.getUserDailyPlaylist()
     month_id = spotifyarchive.doesMonthPlaylistExist(user)
     spotifyarchive.moveToMonthly(daily_id, month_id)
+    spotifyarchive.removeTracks(daily_id)
 
 
 if __name__ == '__main__':
