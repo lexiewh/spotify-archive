@@ -1,13 +1,3 @@
-# Initial steps
-# 1. create the class and main function to initiate set up ✓
-# 2. actions:
-#       - access daily playlist ✓
-#           - items -> name
-#       - check monthly playlists for correct years ✓
-#           - if monthly playlist isn't made, make one ✓
-#       - take all daily songs and move them to month playlist ✓
-#       - remove all songs on daily playlist ✓
-
 import json
 import requests
 import sys
