@@ -133,7 +133,6 @@ class SpotifyArchive(object):
 
         data = {}
         data['tracks'] = tracks
-        print(json.dumps(data))
 
         r = requests.delete('https://api.spotify.com/v1/playlists/{}/tracks'.format(daily_id),
                             headers=self.header, data=json.dumps(data, indent=4))
