@@ -4,13 +4,11 @@ import sys
 from datetime import datetime
 import calendar
 
-from config import spotify_token
-
 
 class SpotifyArchive(object):
     """Move all songs from daily playlist into a month archive"""
 
-    def __init__(self):
+    def __init__(self, spotify_token):
         self.header = {
             "Content-Type": "application/json",
             "Authorization": "Bearer {}".format(spotify_token)
@@ -136,15 +134,21 @@ def main():
     try:
         user = sys.argv[1]
     except:
-        raise Exception("The first command line argument is required")
+        raise Exception(
+            "The first command line argument (username) is required")
 
-    spotifyarchive = SpotifyArchive()
+    try:
+        token = sys.argv[2]
+    except:
+        raise Exception("The second command line argument (token) is required")
+
+    spotifyarchive = SpotifyArchive(token)
     spotifyarchive.createPlaylistDict(
         'https://api.spotify.com/v1/users/{}/playlists?limit=50&offset=0'.format(user))
     daily_id = spotifyarchive.getUserDailyPlaylist()
     month_id = spotifyarchive.doesMonthPlaylistExist(user)
-    spotifyarchive.moveToMonthly(daily_id, month_id)
-    spotifyarchive.removeTracks(daily_id)
+    #spotifyarchive.moveToMonthly(daily_id, month_id)
+    # spotifyarchive.removeTracks(daily_id)
 
 
 if __name__ == '__main__':
